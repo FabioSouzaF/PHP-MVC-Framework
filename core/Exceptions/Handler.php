@@ -4,7 +4,8 @@ namespace Core\Exceptions;
 
 use Throwable;
 use ErrorException;
-use Core\View\View;
+use Core\Http\Session;
+use Core\Exceptions\ValidationException;
 
 class Handler
 {
@@ -23,10 +24,10 @@ class Handler
 
     public function handleException(Throwable $e)
     {
-        if ($e instanceof \Core\Exceptions\ValidationException) {
-            \Core\Http\Session::setFlash('errors', $e->getErrors());
-            \Core\Http\Session::setFlash('old', $_POST); // Salva os dados antigas para repopular o formulário
-            
+        if ($e instanceof ValidationException) {
+            Session::setFlash('errors', $e->getErrors());
+            Session::setFlash('old', $_POST); // Salva os dados antigas para repopular o formulário
+
             $referer = $_SERVER['HTTP_REFERER'] ?? '/';
             header("Location: " . $referer);
             exit;
@@ -36,7 +37,7 @@ class Handler
         if ($code != 404) {
             $code = 500;
         }
-        
+
         http_response_code($code);
 
         $env = $_ENV['APP_ENV'] ?? 'local';
@@ -62,7 +63,7 @@ class Handler
 
         $date = date('Y-m-d H:i:s');
         $message = "[{$date}] Erro: " . $e->getMessage() . " in " . $e->getFile() . " na linha " . $e->getLine() . PHP_EOL;
-        
+
         error_log($message, 3, $logDir . '/app.log');
     }
 

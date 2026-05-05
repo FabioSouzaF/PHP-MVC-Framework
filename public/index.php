@@ -5,19 +5,19 @@
 // 1. Carrega o autoloader do Composer
 require_once __DIR__ . '/../vendor/autoload.php';
 
+use Core\Utils\Env;
+use Core\Exceptions\Handler;
+use Core\Application;
+
+
 // 2. Define a constante para o diretório raiz do projeto (útil para includes/requires)
 define('APP_ROOT', dirname(__DIR__));
 
-\Core\Utils\Env::load(APP_ROOT . '/.env');
-
-// A sessão agora é iniciada através do Core\Session na Application
+Env::load(APP_ROOT . '/.env');
 
 // 3. Registra o Tratador Global de Exceções
-$errorHandler = new \Core\Exceptions\Handler();
+$errorHandler = new Handler();
 $errorHandler->register();
-
-// 4. Inclui a classe Application
-use Core\Application;
 
 //4. define timezone para sao paulo
 date_default_timezone_set('America/Sao_Paulo');

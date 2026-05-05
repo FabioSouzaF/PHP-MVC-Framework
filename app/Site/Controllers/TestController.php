@@ -16,7 +16,7 @@ class TestController extends Controller
         // Forçaremos uma divisão por zero para disparar um Fatal Error (DivisionByZeroError)
         $a = 10;
         $b = 0;
-        return $a / $b; 
+        return $a / $b;
     }
 
     /**
@@ -47,7 +47,7 @@ class TestController extends Controller
      * Testa a Paginação Nativa
      */
     public function pagination()
-    {   
+    {
         $userModel = new User();
         $db = (new \Core\Database\Database())->getConnection();
 
