@@ -90,7 +90,7 @@ class HomeController extends Controller
 **Métodos úteis do Controller:**
 
 - `$this->render('Modulo', 'caminho/view', $dados)`: Renderiza tela html.
-- `$this->json($array)`: Retorna uma resposta JSON de API.
+- `$this->json($array, $status)`: Retorna uma resposta JSON (ideal para APIs REST). Ex: `$this->json(['ok' => true], 200)`.
 - `$this->redirect('/url')`: Redireciona o usuário.
 - `$this->flash('chave', 'mensagem')`: Define uma notificação Flash temporária.
 
@@ -292,3 +292,11 @@ php -S localhost:8000 -t public
 ```
 
 Acesse `http://localhost:8000` no navegador.
+
+---
+
+## 🔭 Roadmap de Funcionalidades Futuras
+
+Curioso sobre o que está por vir? Confira o documento de planejamento com as próximas funcionalidades previstas para o framework, incluindo um **ORM opcional**, mais regras de validação, envio de e-mail e sistema de cache.
+
+👉 [Ver FUTURE_FEATURES.md](./FUTURE_FEATURES.md)
