@@ -1,0 +1,30 @@
+<?php
+
+namespace App\Auth\Models;
+
+use Core\Database\Model;
+use PDO;
+
+class User extends Model
+{
+    public function findByEmail(string $email)
+    {
+        if (!$this->db) return null;
+
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE email = :email");
+        $stmt->execute(['email' => $email]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function create(array $data)
+    {
+        if (!$this->db) return false;
+
+        $stmt = $this->db->prepare("INSERT INTO users (name, email, password) VALUES (:name, :email, :password)");
+        return $stmt->execute([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => password_hash($data['password'], PASSWORD_DEFAULT)
+        ]);
+    }
+}

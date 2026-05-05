@@ -1,0 +1,36 @@
+#!/usr/bin/env php
+<?php
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+define('APP_ROOT', __DIR__);
+
+// Carrega as variáveis de ambiente para conectar no DB
+\Core\Utils\Env::load(APP_ROOT . '/.env');
+
+use Core\Console\Migrator;
+
+$command = $argv[1] ?? null;
+
+if ($command === 'init') {
+    Migrator::initProject();
+    exit;
+}
+
+$migrator = new Migrator();
+
+if ($command === 'migrate') {
+    $migrator->applyMigrations();
+} elseif ($command === 'make:migration') {
+    $name = $argv[2] ?? null;
+    if (!$name) {
+        echo "Uso incorreto. Exemplo: php console make:migration nome_da_tabela" . PHP_EOL;
+        exit(1);
+    }
+    $migrator->makeMigration($name);
+} else {
+    echo "Comandos disponíveis no Modelo MVC:" . PHP_EOL;
+    echo "  init                     - Inicializa o projeto clonado (Copiar .env, cria DB e roda migrations)" . PHP_EOL;
+    echo "  migrate                  - Roda as migrations pendentes" . PHP_EOL;
+    echo "  make:migration <nome>    - Cria um novo arquivo de migration em branco" . PHP_EOL;
+}
