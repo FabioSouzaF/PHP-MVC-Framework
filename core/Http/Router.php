@@ -6,6 +6,7 @@ class Router
 {
     protected array $routes = [];
     protected ?array $lastRoute = null;
+    protected array $groupAttributes = [];
 
     public function get(string $uri, string $controllerClassName, string $methodName)
     {
@@ -29,14 +30,43 @@ class Router
 
     protected function addRoute(string $method, string $uri, string $controllerClassName, string $methodName)
     {
-        $this->routes[$method][$uri] = [
+        $prefix = $this->groupAttributes['prefix'] ?? '';
+        $fullUri = $prefix . $uri;
+        
+        // Remove barras duplas caso existam
+        if ($fullUri !== '/' && strpos($fullUri, '//') !== false) {
+            $fullUri = preg_replace('#/+#', '/', $fullUri);
+        }
+
+        $groupMiddlewares = $this->groupAttributes['middlewares'] ?? [];
+
+        $this->routes[$method][$fullUri] = [
             'controller' => $controllerClassName,
             'method' => $methodName,
-            'middlewares' => []
+            'middlewares' => $groupMiddlewares
         ];
         
-        $this->lastRoute = ['method' => $method, 'uri' => $uri];
+        $this->lastRoute = ['method' => $method, 'uri' => $fullUri];
         return $this; 
+    }
+
+    public function group(array $attributes, callable $callback)
+    {
+        $previousGroupAttributes = $this->groupAttributes;
+        
+        // Transforma 'middleware' string em array caso seja fornecido único
+        $newMiddlewares = isset($attributes['middleware']) ? (array)$attributes['middleware'] : [];
+
+        $this->groupAttributes = [
+            'prefix' => ($previousGroupAttributes['prefix'] ?? '') . ($attributes['prefix'] ?? ''),
+            'middlewares' => array_merge($previousGroupAttributes['middlewares'] ?? [], $newMiddlewares)
+        ];
+
+        // Executa o callback passando a instância do roteador
+        $callback($this);
+
+        // Restaura os atributos originais ao finalizar o grupo
+        $this->groupAttributes = $previousGroupAttributes;
     }
 
     public function middleware(string $middlewareClass)

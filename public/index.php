@@ -12,7 +12,11 @@ define('APP_ROOT', dirname(__DIR__));
 
 // A sessão agora é iniciada através do Core\Session na Application
 
-// 3. Inclui a classe Application (ou a classe principal que gerencia o fluxo)
+// 3. Registra o Tratador Global de Exceções
+$errorHandler = new \Core\Exceptions\Handler();
+$errorHandler->register();
+
+// 4. Inclui a classe Application
 use Core\Application;
 
 //4. define timezone para sao paulo

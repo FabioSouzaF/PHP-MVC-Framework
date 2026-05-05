@@ -38,7 +38,7 @@ class Session
         session_destroy();
     }
 
-    public static function setFlash(string $key, string $message): void
+    public static function setFlash(string $key, $message): void
     {
         $_SESSION['_flash_next'][$key] = $message;
     }

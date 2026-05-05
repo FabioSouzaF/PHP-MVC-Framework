@@ -133,31 +133,63 @@ E as exiba no seu layout (`default.php`):
 <?php endif; ?>
 ```
 
-### 5. Middlewares
+### 5. Middlewares e Agrupamento de Rotas
 
 Middlewares funcionam como "guarda-costas" das rotas.
 O **CsrfMiddleware** já vem ativado globalmente pelo roteador para todas as rotas de alteração (`POST`, `PUT`, `DELETE`).
 
-Para criar um novo Middleware (ex: checar se é admin), crie uma classe implementando `Core\Middleware`:
+Você pode atribuir middlewares a uma rota específica:
 
 ```php
-namespace App\Admin\Middlewares;
+$router->get('/dashboard', DashboardController::class, 'index')
+       ->middleware(\App\Auth\Middlewares\AuthMiddleware::class);
+```
 
-use Core\Http\Middleware;
-use Core\Http\Request;
+Você também pode agrupar rotas para aplicar prefixos e middlewares em lote:
 
-class AdminMiddleware implements Middleware
-{
-    public function handle(Request $request): bool
-    {
-        if (/* não é admin */) {
-            header("Location: /acesso-negado");
-            return false; // Interrompe a requisição
-        }
-        return true; // Permite passar para o Controller
-    }
+```php
+$router->group(['prefix' => '/admin', 'middleware' => \App\Auth\Middlewares\AuthMiddleware::class], function($router) {
+    $router->get('/painel', AdminController::class, 'index');
+    $router->get('/usuarios', AdminController::class, 'users');
+});
+```
+
+### 6. Validação de Dados (Request Validator)
+
+O objeto `Request` possui um validador embutido. Basta passar as regras. Se falhar, o sistema armazena os erros na sessão e volta para a página anterior automaticamente.
+
+**Regras Suportadas Atualmente:**
+
+- `required`: O campo não pode vir vazio.
+- `email`: O campo deve ser um endereço de e-mail válido.
+- `min:X`: O campo deve ter no mínimo X caracteres (ex: `min:6`).
+- `max:X`: O campo deve ter no máximo X caracteres.
+- `numeric`: O campo deve ser numérico (aceita decimais).
+- `integer`: O campo deve ser um número inteiro.
+- `alpha_num`: O campo deve conter apenas letras e números.
+
+**Exemplo de uso no Controller:**
+
+```php
+public function salvar(Request $request) {
+    $dados = $request->validate([
+        'nome' => 'required',
+        'email' => 'required|email',
+        'senha' => 'required|min:6'
+    ]);
+
+    // O código abaixo só executa se a validação passar
+    $this->model->create($dados);
 }
 ```
+
+### 7. Tratamento de Erros e Exceções
+
+O framework possui um `Handler` global (registrado em `public/index.php`).
+Se uma exceção ou erro fatal ocorrer:
+
+- Em ambiente local (`APP_ENV=local`), o erro completo (Stack Trace) será exibido na tela.
+- Em produção (`APP_ENV=production`), uma página 500 genérica será exibida, e o erro detalhado será salvo no arquivo `storage/logs/app.log`.
 
 ---
 
@@ -193,6 +225,8 @@ DB_HOST=localhost
 DB_NAME=modelo_mvc
 DB_USER=root
 DB_PASS=
+
+APP_ENV=local # production
 ```
 
 ### Criando o Banco (Executando Migrations)
@@ -234,6 +268,17 @@ class User extends Model
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 }
+```
+
+#### Paginação Nativa
+
+Em vez de buscar todos os registros com `fetchAll`, você pode usar o helper de paginação passando a query crua. Ele lê automaticamente o parâmetro `?page=` da URL.
+
+```php
+$resultado = $this->paginate("SELECT * FROM users ORDER BY created_at DESC", [], 15);
+
+// Retorna:
+// ['data' => [...], 'current_page' => 1, 'last_page' => 10, 'per_page' => 15, 'total' => 150]
 ```
 
 ---

@@ -17,7 +17,7 @@ return new class {
         // Inserir usuário de teste padrão (Senha: 123456)
         $db->exec("
             INSERT IGNORE INTO `users` (`name`, `email`, `password`) VALUES 
-            ('Usuário Teste', 'teste@teste.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
+            ('Usuário Teste', 'teste@teste.com', '$2y$12\$kdVCvN7JJHyYQABny1obn.GA4Go0a85ZMZ.kvkTf4eVUnQakorNV.');
         ");
     }
 

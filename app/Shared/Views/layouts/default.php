@@ -17,6 +17,11 @@
     <nav>
         <a href="/">Home</a>
         <?php if (\Core\Http\Session::get('user_id')): ?>
+            <a href="/testes/erro">Erro</a>
+            <a href="/testes/form">Formulário</a>
+            <a href="/testes/submit">Submit</a>
+            <a href="/testes/paginacao">Paginacao</a>
+
             <a href="/logout">Sair</a>
         <?php else: ?>
             <a href="/login">Login</a>
