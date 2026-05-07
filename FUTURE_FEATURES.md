@@ -37,8 +37,9 @@ $user->delete();                               // DELETE FROM users WHERE id = .
 ```
 
 ### Princípio de Adoção:
+
 - O ORM **nunca será forçado**. Quem usar `Model` puro não perceberá diferença.
-- A documentação deixará explícito: *"Se quiser agilidade, use ORM. Se quiser controle total, use SQL puro."*
+- A documentação deixará explícito: _"Se quiser agilidade, use ORM. Se quiser controle total, use SQL puro."_
 - Ambas as abordagens poderão coexistir no mesmo projeto.
 
 ---
@@ -49,16 +50,16 @@ $user->delete();                               // DELETE FROM users WHERE id = .
 
 Expandir o `Request::validate()` com mais tipos de regras prontas para uso:
 
-| Regra | Descrição |
-|---|---|
-| `confirmed` | Verifica se o campo `{campo}_confirmation` tem o mesmo valor (ex: senha/confirmar senha) |
-| `unique:tabela` | Verifica se o valor ainda não existe no banco de dados |
-| `exists:tabela` | Verifica se o valor existe no banco de dados |
-| `date` | Valida se o valor é uma data válida |
-| `url` | Valida se o valor é uma URL válida |
-| `in:a,b,c` | Verifica se o valor está dentro de uma lista de opções |
-| `not_in:a,b,c` | Verifica se o valor NÃO está dentro de uma lista de opções |
-| `regex:/padrão/` | Valida o valor contra uma expressão regular customizada |
+| Regra            | Descrição                                                                                |
+| ---------------- | ---------------------------------------------------------------------------------------- |
+| `confirmed`      | Verifica se o campo `{campo}_confirmation` tem o mesmo valor (ex: senha/confirmar senha) |
+| `unique:tabela`  | Verifica se o valor ainda não existe no banco de dados                                   |
+| `exists:tabela`  | Verifica se o valor existe no banco de dados                                             |
+| `date`           | Valida se o valor é uma data válida                                                      |
+| `url`            | Valida se o valor é uma URL válida                                                       |
+| `in:a,b,c`       | Verifica se o valor está dentro de uma lista de opções                                   |
+| `not_in:a,b,c`   | Verifica se o valor NÃO está dentro de uma lista de opções                               |
+| `regex:/padrão/` | Valida o valor contra uma expressão regular customizada                                  |
 
 ---
 
@@ -67,6 +68,7 @@ Expandir o `Request::validate()` com mais tipos de regras prontas para uso:
 **Prioridade:** Alta | **Complexidade:** Média
 
 Disponibilizar um módulo `Auth` mais completo incluindo:
+
 - **"Lembrar de mim"**: persistência de sessão via cookie seguro.
 - **Reset de Senha**: fluxo de e-mail com token temporário.
 - **Verificação de E-mail**: envio de link de confirmação após o registro.
@@ -128,6 +130,76 @@ $users = \Core\Cache\Cache::remember('all_users', 300, function() {
 });
 // Armazena o resultado por 300 segundos. Na próxima chamada, lê do cache.
 ```
+
+---
+
+## 7. 🧱 Data Transfer Objects (DTOs) — Dados Tipados do Banco
+
+**Prioridade:** Média | **Complexidade:** Baixa-Média
+
+Atualmente, as queries retornam **arrays anônimos** (`array<string, mixed>`), o que torna o código mais frágil: qualquer typo num nome de chave (`$user['naem']` em vez de `$user['name']`) só estoura em tempo de execução, e o editor não consegue te dar autocomplete.
+
+A ideia é criar uma camada de **Data Transfer Objects (DTOs)** — classes simples e reutilizáveis que representam os dados de uma tabela de forma **tipada e concreta**.
+
+### Como funcionaria:
+
+O desenvolvedor criaria uma classe DTO para cada entidade, usando o PHP 8 `readonly` para garantir imutabilidade:
+
+```php
+// app/Auth/DTOs/UserDTO.php
+namespace App\Auth\DTOs;
+
+class UserDTO
+{
+    public function __construct(
+        public readonly int $id,
+        public readonly string $name,
+        public readonly string $email,
+        public readonly string $created_at,
+    ) {}
+
+    // Factory: converte um array bruto do banco em um DTO tipado
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            id: (int) $data['id'],
+            name: $data['name'],
+            email: $data['email'],
+            created_at: $data['created_at'],
+        );
+    }
+}
+```
+
+O `Model` ganharia dois novos métodos opcionais: `fetchAs()` e `paginateAs()`, que convertem os resultados automaticamente:
+
+```php
+// No seu Model:
+class User extends Model
+{
+    protected string $dtoClass = UserDTO::class; // opcional: define o DTO padrão
+
+    public function findAll(): array
+    {
+        // Retorna um array de UserDTO em vez de um array de arrays
+        return $this->fetchAs("SELECT * FROM users ORDER BY name", [], UserDTO::class);
+    }
+}
+
+// No Controller, você agora tem segurança total de tipos:
+$users = $userModel->findAll(); // array de UserDTO
+
+foreach ($users as $user) {
+    echo $user->name;       // ✅ Autocomplete no editor
+    echo $user->naem;       // ❌ Erro em tempo de desenvolvimento, não em produção
+}
+```
+
+### Princípio de Adoção:
+
+- DTOs são **100% opcionais**. Quem não quiser, continua usando arrays normais.
+- O método `fetchAs()` no Model aceitará qualquer classe com um método `static fromArray()`.
+- Compatível tanto com SQL puro quanto com o futuro ORM.
 
 ---
 

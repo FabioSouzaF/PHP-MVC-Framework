@@ -138,21 +138,33 @@ E as exiba no seu layout (`default.php`):
 Middlewares funcionam como "guarda-costas" das rotas.
 O **CsrfMiddleware** já vem ativado globalmente pelo roteador para todas as rotas de alteração (`POST`, `PUT`, `DELETE`).
 
-Você pode atribuir middlewares a uma rota específica:
-
+**Middleware em rota individual:**
 ```php
 $router->get('/dashboard', DashboardController::class, 'index')
        ->middleware(\App\Auth\Middlewares\AuthMiddleware::class);
 ```
 
-Você também pode agrupar rotas para aplicar prefixos e middlewares em lote:
-
+**Middleware no grupo (aplicado automaticamente a todas as rotas do grupo):**
 ```php
-$router->group(['prefix' => '/admin', 'middleware' => \App\Auth\Middlewares\AuthMiddleware::class], function($router) {
-    $router->get('/painel', AdminController::class, 'index');
-    $router->get('/usuarios', AdminController::class, 'users');
+$router->group(['prefix' => '/admin', 'middleware' => AuthMiddleware::class], function ($router) {
+    $router->get('/painel', AdminController::class, 'index');    // tem AuthMiddleware
+    $router->get('/usuarios', AdminController::class, 'users');  // tem AuthMiddleware
 });
 ```
+
+**Combinando: middleware do grupo + middleware extra por rota:**
+```php
+$router->group(['prefix' => '/admin', 'middleware' => AuthMiddleware::class], function ($router) {
+    // Essa rota tem AuthMiddleware (herdado do grupo)
+    $router->get('/painel', AdminController::class, 'index');
+
+    // Essa rota tem AuthMiddleware (grupo) + AdminOnlyMiddleware (extra individual)
+    $router->delete('/usuario/{id}', AdminController::class, 'destroy')
+           ->middleware(AdminOnlyMiddleware::class);
+});
+```
+
+> 💡 A ordem de execução é: **CSRF Global → Middlewares do Grupo → Middleware Individual → Controller**.
 
 ### 6. Validação de Dados (Request Validator)
 
