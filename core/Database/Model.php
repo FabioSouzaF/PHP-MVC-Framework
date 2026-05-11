@@ -15,6 +15,38 @@ abstract class Model
     }
 
     /**
+     * Executa uma query e retorna os resultados como um array de objetos DTO.
+     *
+     * @template T
+     * @param class-string<T> $dtoClass Classe com método estático fromArray()
+     * @return T[]
+     */
+    public function fetchAs(string $sql, string $dtoClass, array $params = []): array
+    {
+        if (!$this->db) return [];
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return array_map(fn($row) => $dtoClass::fromArray($row), $rows);
+    }
+
+    /**
+     * Pagina uma query e retorna os resultados como objetos DTO.
+     * O campo 'data' conterá instâncias de $dtoClass em vez de arrays.
+     *
+     * @template T
+     * @param class-string<T> $dtoClass Classe com método estático fromArray()
+     */
+    public function paginateAs(string $sql, string $dtoClass, array $params = [], int $perPage = 15): array
+    {
+        $result = $this->paginate($sql, $params, $perPage);
+        $result['data'] = array_map(fn($row) => $dtoClass::fromArray($row), $result['data']);
+        return $result;
+    }
+
+    /**
      * Helper para paginar qualquer query nativa automaticamente
      */
     public function paginate(string $sql, array $params = [], int $perPage = 15): array

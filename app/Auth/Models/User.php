@@ -3,6 +3,7 @@
 namespace App\Auth\Models;
 
 use Core\Database\Model;
+use App\Auth\DTOs\UserDTO;
 use PDO;
 
 class User extends Model
@@ -20,11 +21,21 @@ class User extends Model
     {
         if (!$this->db) return false;
 
-        $stmt = $this->db->prepare("INSERT INTO users (name, email, password) VALUES (:name, :email, :password)");
+        $stmt = $this->db->prepare("INSERT IGNORE INTO users (name, email, password) VALUES (:name, :email, :password)");
         return $stmt->execute([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => password_hash($data['password'], PASSWORD_DEFAULT)
         ]);
+    }
+
+    /**
+     * Exemplo de uso de DTOs: retorna todos os usuários como UserDTO tipados.
+     *
+     * @return UserDTO[]
+     */
+    public function findAllAsDTO(): array
+    {
+        return $this->fetchAs("SELECT id, name, email, created_at FROM users ORDER BY name", UserDTO::class);
     }
 }

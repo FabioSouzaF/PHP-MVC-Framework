@@ -133,7 +133,7 @@ $users = \Core\Cache\Cache::remember('all_users', 300, function() {
 
 ---
 
-## 7. 🧱 Data Transfer Objects (DTOs) — Dados Tipados do Banco
+## ~~7. 🧱 Data Transfer Objects (DTOs) — Dados Tipados do Banco~~ ✅ Já Implementado!
 
 **Prioridade:** Média | **Complexidade:** Baixa-Média
 
@@ -200,6 +200,22 @@ foreach ($users as $user) {
 - DTOs são **100% opcionais**. Quem não quiser, continua usando arrays normais.
 - O método `fetchAs()` no Model aceitará qualquer classe com um método `static fromArray()`.
 - Compatível tanto com SQL puro quanto com o futuro ORM.
+
+---
+
+## ~~8. 🧪 Testes Unitários (PHPUnit)~~ ✅ Já Implementado!
+
+O PHPUnit 13 foi integrado como dependência de desenvolvimento. A suíte cobre o Validador, o Roteador e os DTOs.
+
+```bash
+# Instalar
+composer install
+
+# Rodar todos os testes
+./vendor/bin/phpunit
+```
+
+Consulte o `README.md` para mais detalhes sobre como criar novos testes.
 
 ---
 

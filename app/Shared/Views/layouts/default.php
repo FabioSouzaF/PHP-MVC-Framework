@@ -63,6 +63,7 @@
                     <li><a href="/testes/erro">Erro Fatal</a></li>
                     <li><a href="/testes/form">Formulário</a></li>
                     <li><a href="/testes/paginacao">Paginação</a></li>
+                    <li><a href="/testes/dtos">DTOs Tipados</a></li>
                 </ul>
             </li>
             <li><a href="/logout">Sair</a></li>

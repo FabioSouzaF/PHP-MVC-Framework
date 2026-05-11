@@ -4,7 +4,7 @@ use App\Site\Controllers\HomeController;
 use App\Auth\Middlewares\AuthMiddleware;
 use App\Site\Controllers\TestController;
 
-/** @var \Core\Router $router */
+/** @var \Core\Http\Router $router */
 
 $router->get('/', HomeController::class, 'index');
 
@@ -28,4 +28,7 @@ $router->group(['prefix' => '/testes', 'middleware' => AuthMiddleware::class], f
 
     // Herda o AuthMiddleware do grupo
     $router->get('/paginacao', TestController::class, 'pagination');
+
+    // Demo de DTOs tipados
+    $router->get('/dtos', TestController::class, 'dtos');
 });

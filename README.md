@@ -139,12 +139,14 @@ Middlewares funcionam como "guarda-costas" das rotas.
 O **CsrfMiddleware** já vem ativado globalmente pelo roteador para todas as rotas de alteração (`POST`, `PUT`, `DELETE`).
 
 **Middleware em rota individual:**
+
 ```php
 $router->get('/dashboard', DashboardController::class, 'index')
        ->middleware(\App\Auth\Middlewares\AuthMiddleware::class);
 ```
 
 **Middleware no grupo (aplicado automaticamente a todas as rotas do grupo):**
+
 ```php
 $router->group(['prefix' => '/admin', 'middleware' => AuthMiddleware::class], function ($router) {
     $router->get('/painel', AdminController::class, 'index');    // tem AuthMiddleware
@@ -153,6 +155,7 @@ $router->group(['prefix' => '/admin', 'middleware' => AuthMiddleware::class], fu
 ```
 
 **Combinando: middleware do grupo + middleware extra por rota:**
+
 ```php
 $router->group(['prefix' => '/admin', 'middleware' => AuthMiddleware::class], function ($router) {
     // Essa rota tem AuthMiddleware (herdado do grupo)
@@ -261,6 +264,38 @@ php console make:migration nome_da_sua_tabela
 
 Isso gerará um arquivo na pasta `database/migrations/`. Abra-o e digite o SQL de criação dentro do método `up()`.
 
+### Gerando Código pela CLI
+
+O `console` também automatiza a criação de **Testes Unitários** e **DTOs**, evitando o trabalho manual de criar pastas e boilerplate.
+
+**Criar um Teste Unitário:**
+
+```bash
+# Gera: tests/Unit/Core/ValidatorTest.php
+php console make:test Core/ValidatorTest
+
+# Gera: tests/Unit/App/DTOs/PedidoDTOTest.php
+php console make:test App/DTOs/PedidoDTOTest
+```
+
+**Criar um DTO:**
+
+```bash
+# Gera: app/Auth/DTOs/UserDTO.php
+php console make:dto Auth/UserDTO
+
+# Gera: app/Pedidos/DTOs/PedidoDTO.php
+php console make:dto Pedidos/PedidoDTO
+```
+
+Ambos os comandos criam o arquivo com toda a estrutura de namespace, imports e métodos prontos. Basta preencher os campos específicos.
+
+**Ver todos os comandos disponíveis:**
+
+```bash
+php console
+```
+
 ### Consultando Dados (Models)
 
 A classe `Core\Database\Model` utiliza a conexão feita em `Core\Database\Database`.
@@ -291,6 +326,111 @@ $resultado = $this->paginate("SELECT * FROM users ORDER BY created_at DESC", [],
 
 // Retorna:
 // ['data' => [...], 'current_page' => 1, 'last_page' => 10, 'per_page' => 15, 'total' => 150]
+```
+
+#### DTOs — Retorno Tipado do Banco
+
+Em vez de arrays anônimos `array<string, mixed>`, você pode usar **Data Transfer Objects (DTOs)** para receber os dados tipados e com autocomplete no editor.
+
+**1. Crie o DTO da entidade** em `app/SeuModulo/DTOs/`:
+
+```php
+namespace App\Auth\DTOs;
+
+final class UserDTO
+{
+    public function __construct(
+        public readonly int    $id,
+        public readonly string $name,
+        public readonly string $email,
+        public readonly string $created_at,
+    ) {}
+
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            id: (int) $data['id'],
+            name: (string) ($data['name'] ?? ''),
+            email: (string) ($data['email'] ?? ''),
+            created_at: (string) ($data['created_at'] ?? ''),
+        );
+    }
+}
+```
+
+**2. Use `fetchAs()` no Model** passando a classe do DTO:
+
+```php
+// Retorna UserDTO[] em vez de array[]
+$users = $this->fetchAs("SELECT id, name, email, created_at FROM users", UserDTO::class);
+
+// Com parâmetros:
+$users = $this->fetchAs("SELECT * FROM users WHERE active = ?", UserDTO::class, [1]);
+
+// Paginado com DTOs:
+$resultado = $this->paginateAs("SELECT * FROM users", UserDTO::class, [], 15);
+// $resultado['data'] será um array de UserDTO
+```
+
+**Resultado no Controller:**
+
+```php
+foreach ($users as $user) {
+    echo $user->name;  // ✅ Autocomplete no editor, erro imediato se errar o nome
+}
+```
+
+> 💡 DTOs são **100% opcionais**. Você pode continuar usando `fetchAll()` e arrays normais se preferir.
+
+---
+
+## 🧪 Testes Unitários (PHPUnit 13)
+
+O framework possui uma suíte de testes configurada com **PHPUnit 13**. Os testes ficam em `tests/Unit/` e podem ser rodados a qualquer momento.
+
+### Instalação (primeira vez)
+
+```bash
+composer install
+```
+
+### Rodando os testes
+
+```bash
+# Todos os testes
+./vendor/bin/phpunit
+
+# Apenas uma classe específica
+./vendor/bin/phpunit tests/Unit/Core/ValidatorTest.php
+```
+
+### Testes incluídos
+
+| Arquivo                               | O que testa                                                            |
+| ------------------------------------- | ---------------------------------------------------------------------- |
+| `tests/Unit/Core/ValidatorTest.php`   | Todas as regras do `Request::validate()`, mass-assignment, combinações |
+| `tests/Unit/Core/RouterTest.php`      | Registro de rotas, prefixos de grupo, herança de middlewares           |
+| `tests/Unit/App/DTOs/UserDTOTest.php` | Conversão `fromArray()`, casting de tipos, propriedades `readonly`     |
+
+### Criando novos testes
+
+Extenda a classe `Tests\TestCase` que já inclui helpers prontos:
+
+```php
+namespace Tests\Unit\App;
+
+use Tests\TestCase;
+
+class MeuNovoTest extends TestCase
+{
+    public function test_meu_cenario(): void
+    {
+        // Helper pronto: cria um Request fake sem precisar de HTTP real
+        $request = $this->makeRequest(post: ['campo' => 'valor']);
+
+        $this->assertSame('valor', $request->post('campo'));
+    }
+}
 ```
 
 ---

@@ -71,4 +71,20 @@ class TestController extends Controller
             'paginacao' => $resultado
         ]);
     }
+
+    /**
+     * Demonstra o uso de DTOs tipados
+     */
+    public function dtos()
+    {
+        $userModel = new User();
+
+        // fetchAs() retorna um array de UserDTO em vez de arrays anônimos
+        $users = $userModel->findAllAsDTO();
+
+        $this->render('Site', 'test/dtos', [
+            'title' => 'Teste de DTOs Tipados',
+            'users' => $users
+        ]);
+    }
 }
