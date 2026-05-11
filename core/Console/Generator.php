@@ -126,4 +126,83 @@ PHP;
         echo "   💡 Preencha as propriedades e o método fromArray() com os campos da sua tabela." . PHP_EOL;
         echo "   📖 Uso no Model: \$this->fetchAs(\$sql, {$className}::class);" . PHP_EOL;
     }
+
+    /**
+     * Cria um novo arquivo de Model
+     */
+    public static function makeModel(string $name, bool $useOrm = false): void
+    {
+        // Ex: "Auth/UserModel"
+        $parts = explode('/', $name);
+        $className = array_pop($parts);
+
+        // Se não passar módulo, assume App\Shared\Models (ou App\Models se preferir)
+        $module = !empty($parts) ? array_shift($parts) : 'Shared';
+        
+        $namespace = "App\\{$module}\\Models";
+        $dir = APP_ROOT . "/app/{$module}/Models";
+        $filepath = $dir . '/' . $className . '.php';
+
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        if (file_exists($filepath)) {
+            echo "⚠️  Arquivo já existe: $filepath" . PHP_EOL;
+            exit(1);
+        }
+
+        if ($useOrm) {
+            $extends = 'Core\\Database\\ORM\\ActiveRecord';
+            $content = <<<PHP
+<?php
+
+namespace {$namespace};
+
+use {$extends};
+
+/**
+ * Model {$className} usando o ORM ActiveRecord.
+ * 
+ * Atributos dinâmicos baseados no banco de dados:
+ * @property int \$id
+ */
+class {$className} extends ActiveRecord
+{
+    // protected string \$table = 'nome_tabela';
+    // protected ?string \$dtoClass = \App\\{$module}\DTOs\\ExemploDTO::class;
+}
+PHP;
+        } else {
+            $extends = 'Core\\Database\\Model';
+            $content = <<<PHP
+<?php
+
+namespace {$namespace};
+
+use {$extends};
+use PDO;
+
+/**
+ * Model {$className} usando SQL Puro.
+ */
+class {$className} extends Model
+{
+    public function findAll(): array
+    {
+        if (!\$this->db) return [];
+        
+        \$stmt = \$this->db->prepare("SELECT * FROM tabela");
+        \$stmt->execute();
+        return \$stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+}
+PHP;
+        }
+
+        file_put_contents($filepath, $content);
+        echo "✅ Model criado com sucesso!" . PHP_EOL;
+        echo "   📄 {$filepath}" . PHP_EOL;
+        echo "   🔧 Modo: " . ($useOrm ? "ActiveRecord (ORM)" : "SQL Puro") . PHP_EOL;
+    }
 }

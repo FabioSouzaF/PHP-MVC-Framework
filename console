@@ -59,6 +59,19 @@ if ($command === 'make:dto') {
     exit;
 }
 
+if ($command === 'make:model') {
+    $name = $argv[2] ?? null;
+    $useOrm = ($argv[3] ?? '') === '--orm';
+    
+    if (!$name) {
+        echo "Uso incorreto. Exemplo: php console make:model Auth/UserModel" . PHP_EOL;
+        echo "             Ou (ORM): php console make:model Auth/UserModel --orm" . PHP_EOL;
+        exit(1);
+    }
+    Generator::makeModel($name, $useOrm);
+    exit;
+}
+
 // --- Ajuda ---
 echo PHP_EOL;
 echo "  🛠️  PHP-MVC-Framework — Comandos disponíveis:" . PHP_EOL;
@@ -74,5 +87,7 @@ echo "                                 Ex: php console make:test Core/ValidatorT
 echo "                                 Ex: php console make:test App/DTOs/UserDTOTest" . PHP_EOL;
 echo "    make:dto  <Modulo/NomeDTO>   Cria um arquivo de DTO tipado em app/Modulo/DTOs/" . PHP_EOL;
 echo "                                 Ex: php console make:dto Auth/UserDTO" . PHP_EOL;
-echo "                                 Ex: php console make:dto Pedidos/PedidoDTO" . PHP_EOL;
+echo "    make:model <Modulo/Nome>     Cria um novo Model em app/Modulo/Models/" . PHP_EOL;
+echo "                                 Adicione --orm no final para usar o ActiveRecord" . PHP_EOL;
+echo "                                 Ex: php console make:model Pedidos/PedidoModel --orm" . PHP_EOL;
 echo PHP_EOL;

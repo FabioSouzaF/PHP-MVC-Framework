@@ -87,4 +87,35 @@ class TestController extends Controller
             'users' => $users
         ]);
     }
+
+    /**
+     * Demonstra o uso do ORM (ActiveRecord)
+     */
+    public function orm()
+    {
+        // 1. Inserção (Create)
+        $novoUsuario = \App\Auth\Models\UserORM::create([
+            'name' => 'Usuário ORM ' . rand(100, 999),
+            'email' => 'orm' . rand(100, 999) . '@teste.com',
+            'password' => password_hash('123456', PASSWORD_DEFAULT)
+        ]);
+
+        // 2. Atualização (Update)
+        $novoUsuario->name = $novoUsuario->name . ' (Editado)';
+        $novoUsuario->save();
+
+        // 3. Busca usando Query Builder e convertendo para DTO
+        $dtos = \App\Auth\Models\UserORM::query()
+            ->orderBy('id', 'DESC')
+            ->limit(10)
+            ->getAsDTO();
+
+        // 4. Deleção (apenas do que acabamos de criar para não sujar o banco)
+        $novoUsuario->delete();
+
+        $this->render('Site', 'test/orm', [
+            'title' => 'Teste de ORM (ActiveRecord)',
+            'dtos' => $dtos
+        ]);
+    }
 }

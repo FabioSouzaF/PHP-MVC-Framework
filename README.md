@@ -283,9 +283,16 @@ php console make:test App/DTOs/PedidoDTOTest
 ```bash
 # Gera: app/Auth/DTOs/UserDTO.php
 php console make:dto Auth/UserDTO
+```
 
-# Gera: app/Pedidos/DTOs/PedidoDTO.php
-php console make:dto Pedidos/PedidoDTO
+**Criar um Model:**
+
+```bash
+# Model tradicional (SQL puro)
+php console make:model Pedidos/PedidoModel
+
+# Model usando ORM ActiveRecord
+php console make:model Pedidos/PedidoModel --orm
 ```
 
 Ambos os comandos criam o arquivo com toda a estrutura de namespace, imports e métodos prontos. Basta preencher os campos específicos.
@@ -298,7 +305,7 @@ php console
 
 ### Consultando Dados (Models)
 
-A classe `Core\Database\Model` utiliza a conexão feita em `Core\Database\Database`.
+A classe `Core\Database\Model` utiliza a conexão feita em `Core\Database\Database` e é ideal para quem prefere escrever **SQL puro**.
 
 ```php
 namespace App\Auth\Models;
@@ -316,6 +323,47 @@ class User extends Model
     }
 }
 ```
+
+### Consultando Dados via ORM (ActiveRecord)
+
+O framework também fornece um ORM leve opcional. Com ele, você não precisa escrever queries de CRUD ou buscas simples.
+
+```php
+namespace App\Auth\Models;
+
+use Core\Database\ORM\ActiveRecord;
+
+class UserORM extends ActiveRecord
+{
+    protected string $table = 'users';
+}
+```
+
+**Usando o ORM no Controller:**
+
+```php
+// Inserir
+$user = UserORM::create(['name' => 'João', 'email' => 'joao@teste.com']);
+
+// Buscar por ID
+$user = UserORM::find(1);
+
+// Atualizar
+$user->name = 'João Editado';
+$user->save();
+
+// Buscar com condições e ordenação
+$users = UserORM::query()
+    ->where('active', 1)
+    ->orderBy('created_at', 'DESC')
+    ->limit(10)
+    ->get(); // Retorna array de objetos UserORM
+
+// Deletar
+$user->delete();
+```
+
+> **Integração com DTOs:** O ORM possui um método útil `$userModel->getAsDTO()` e `$user->toDTO()` para converter os resultados diretamente em DTOs tipados.
 
 #### Paginação Nativa
 

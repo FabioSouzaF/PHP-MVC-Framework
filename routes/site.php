@@ -31,4 +31,7 @@ $router->group(['prefix' => '/testes', 'middleware' => AuthMiddleware::class], f
 
     // Demo de DTOs tipados
     $router->get('/dtos', TestController::class, 'dtos');
+
+    // Demo de ORM
+    $router->get('/orm', TestController::class, 'orm');
 });

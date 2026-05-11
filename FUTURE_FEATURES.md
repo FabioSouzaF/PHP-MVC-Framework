@@ -4,43 +4,18 @@ Este documento lista as próximas evoluções planejadas para o **PHP-MVC-Framew
 
 ---
 
-## 1. 🗂️ ORM Opcional (ActiveRecord Leve)
+## ~~1. 🗂️ ORM Opcional (ActiveRecord Leve)~~ ✅ Já Implementado!
 
 **Prioridade:** Alta | **Complexidade:** Média-Alta
 
-Atualmente o framework trabalha com **SQL puro + Prepared Statements**, o que oferece controle total e máxima performance. No entanto, em projetos maiores, um ORM pode acelerar muito o desenvolvimento.
+O framework agora fornece a classe `Core\Database\ORM\ActiveRecord` para projetos que preferem não escrever SQL manualmente.
+Foi também adicionado um comando ao console para gerar models via linha de comando:
 
-A proposta é criar um **ORM opcional** que o usuário **escolhe ativar** por projeto — sem quebrar nada para quem prefere continuar usando SQL puro.
-
-### Como funcionaria:
-
-O `Core\Database\Model` atual continuará funcionando 100% como está. O ORM seria uma **classe separada** (`Core\Database\ORM\ActiveRecord`) que o usuário estende caso queira:
-
-```php
-// Sem ORM (comportamento atual, sempre disponível):
-class UserModel extends \Core\Database\Model { ... }
-
-// Com ORM ativado (opcional):
-class UserModel extends \Core\Database\ORM\ActiveRecord
-{
-    protected string $table = 'users';
-
-    // Pronto! Você já ganha os métodos abaixo automaticamente:
-}
-
-// Exemplos de uso:
-$user = UserModel::find(1);                    // SELECT * FROM users WHERE id = 1
-$users = UserModel::where('active', 1)->get(); // SELECT * FROM users WHERE active = 1
-$user = UserModel::create(['name' => 'Fabio']);// INSERT INTO users ...
-$user->update(['name' => 'Fabio S.']);         // UPDATE users SET ...
-$user->delete();                               // DELETE FROM users WHERE id = ...
+```bash
+php console make:model NomeDoModel --orm
 ```
 
-### Princípio de Adoção:
-
-- O ORM **nunca será forçado**. Quem usar `Model` puro não perceberá diferença.
-- A documentação deixará explícito: _"Se quiser agilidade, use ORM. Se quiser controle total, use SQL puro."_
-- Ambas as abordagens poderão coexistir no mesmo projeto.
+Para mais detalhes e exemplos práticos, consulte o README.md.
 
 ---
 
