@@ -38,16 +38,15 @@ Expandir o `Request::validate()` com mais tipos de regras prontas para uso:
 
 ---
 
-## 3. 🔑 Sistema de Autenticação Completo
+## ~~3. 🔑 Sistema de Autenticação Completo~~ ✅ Já Implementado!
 
 **Prioridade:** Alta | **Complexidade:** Média
 
-Disponibilizar um módulo `Auth` mais completo incluindo:
+O sistema de `Auth` agora é completo e inclui:
 
-- **"Lembrar de mim"**: persistência de sessão via cookie seguro.
-- **Reset de Senha**: fluxo de e-mail com token temporário.
-- **Verificação de E-mail**: envio de link de confirmação após o registro.
-- **Throttling de Login**: bloqueio temporário após X tentativas falhas.
+- **"Lembrar de mim"**: persistência de sessão via cookie seguro (`remember_token`).
+- **Reset de Senha**: fluxo completo com formulários e tokens no banco.
+- **Throttling de Login**: (Ainda pendente - pode ser implementado no futuro)
 
 ---
 
@@ -70,13 +69,14 @@ $router->group(['prefix' => '/api/v1'], function ($router) {
 
 ---
 
-## 5. 📧 Serviço de E-mail
+## ~~5. 📧 Serviço de E-mail~~ ✅ Já Implementado!
 
 **Prioridade:** Média | **Complexidade:** Média
 
-Uma classe `Core\Mail\Mailer` que encapsula o envio de e-mails via SMTP (usando a biblioteca nativa PHPMailer), configurável pelo `.env`:
+A classe `Core\Mail\Mailer` encapsula o envio de e-mails via SMTP (usando a biblioteca nativa PHPMailer), configurável pelo `.env`:
 
 ```env
+MAIL_DRIVER=smtp # ou "log" para ambiente local
 MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
 MAIL_USER=seu@email.com
@@ -86,9 +86,7 @@ MAIL_FROM_NAME="PHP MVC Framework"
 
 ```php
 \Core\Mail\Mailer::to('usuario@email.com')
-    ->subject('Bem-vindo!')
-    ->view('Auth', 'emails/welcome', ['name' => $user['name']])
-    ->send();
+    ->send('Bem-vindo!', 'Conteúdo do e-mail em HTML');
 ```
 
 ---
@@ -191,6 +189,19 @@ composer install
 ```
 
 Consulte o `README.md` para mais detalhes sobre como criar novos testes.
+
+---
+
+## 9. 📚 Portal de Documentação Integrado
+
+**Prioridade:** Média | **Complexidade:** Média
+
+Atualmente a documentação vive apenas no `README.md`. À medida que o framework cresce com novas abstrações (ORM, DTOs, Validações, Auth), precisamos de um espaço mais amigável e interativo.
+
+A ideia é criar um portal de documentação **servido pelo próprio framework**, possivelmente com rotas na aba `/docs`.
+- Parse de arquivos `.md` na pasta `docs/` para HTML.
+- Menu lateral para navegação pelas funcionalidades (Rotas, ORM, Views, etc).
+- Demonstrações com blocos de código em highlight.
 
 ---
 

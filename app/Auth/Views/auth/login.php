@@ -9,5 +9,12 @@
         <label>Senha:</label><br>
         <input type="password" name="password" required>
     </div>
+    <div style="margin-bottom: 15px;">
+        <label>
+            <input type="checkbox" name="remember_me" value="1"> Lembrar de mim
+        </label>
+        <br>
+        <a href="/esqueci-a-senha" style="font-size: 14px; color: #007BFF;">Esqueci minha senha</a>
+    </div>
     <button type="submit">Entrar</button>
 </form>

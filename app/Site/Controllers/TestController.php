@@ -5,6 +5,7 @@ namespace App\Site\Controllers;
 use Core\Controller;
 use Core\Http\Request;
 use App\Auth\Models\User;
+use App\Auth\Models\UserORM;
 
 class TestController extends Controller
 {
@@ -94,7 +95,7 @@ class TestController extends Controller
     public function orm()
     {
         // 1. Inserção (Create)
-        $novoUsuario = \App\Auth\Models\UserORM::create([
+        $novoUsuario = UserORM::create([
             'name' => 'Usuário ORM ' . rand(100, 999),
             'email' => 'orm' . rand(100, 999) . '@teste.com',
             'password' => password_hash('123456', PASSWORD_DEFAULT)
@@ -105,7 +106,7 @@ class TestController extends Controller
         $novoUsuario->save();
 
         // 3. Busca usando Query Builder e convertendo para DTO
-        $dtos = \App\Auth\Models\UserORM::query()
+        $dtos = UserORM::query()
             ->orderBy('id', 'DESC')
             ->limit(10)
             ->getAsDTO();

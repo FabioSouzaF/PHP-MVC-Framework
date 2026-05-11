@@ -10,6 +10,19 @@ class Session
             session_start();
         }
 
+        // Auto-login (Remember Me)
+        if (!isset($_SESSION['user_id']) && isset($_COOKIE['remember_me'])) {
+            $token = $_COOKIE['remember_me'];
+            $userModel = new \App\Auth\Models\User();
+            $user = $userModel->findByRememberToken($token);
+            if ($user) {
+                $_SESSION['user_id'] = $user['id'];
+            } else {
+                // Token inválido, limpa o cookie
+                setcookie('remember_me', '', time() - 3600, '/');
+            }
+        }
+
         if (!isset($_SESSION['_flash_next'])) {
             $_SESSION['_flash_next'] = [];
         }

@@ -115,6 +115,7 @@ class ComposerStaticInitd2f941fce1011be9264535e466e78046
             'Psr\\Http\\Client\\' => 16,
             'Psr\\Clock\\' => 10,
             'PhpParser\\' => 10,
+            'PHPMailer\\PHPMailer\\' => 20,
         ),
         'M' => 
         array (
@@ -192,6 +193,10 @@ class ComposerStaticInitd2f941fce1011be9264535e466e78046
         'PhpParser\\' => 
         array (
             0 => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser',
+        ),
+        'PHPMailer\\PHPMailer\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/phpmailer/phpmailer/src',
         ),
         'Minishlink\\WebPush\\' => 
         array (

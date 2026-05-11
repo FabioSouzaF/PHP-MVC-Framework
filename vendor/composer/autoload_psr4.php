@@ -15,6 +15,7 @@ return array(
     'Psr\\Http\\Client\\' => array($vendorDir . '/psr/http-client/src'),
     'Psr\\Clock\\' => array($vendorDir . '/psr/clock/src'),
     'PhpParser\\' => array($vendorDir . '/nikic/php-parser/lib/PhpParser'),
+    'PHPMailer\\PHPMailer\\' => array($vendorDir . '/phpmailer/phpmailer/src'),
     'Minishlink\\WebPush\\' => array($vendorDir . '/minishlink/web-push/src'),
     'Masterminds\\' => array($vendorDir . '/masterminds/html5/src'),
     'Jose\\Component\\' => array($vendorDir . '/web-token/jwt-library'),
